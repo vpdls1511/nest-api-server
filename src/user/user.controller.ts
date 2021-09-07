@@ -1,5 +1,8 @@
-import { Controller, Delete, Get, Patch, Post } from "@nestjs/common";
+import { Controller, Delete, Get, HttpException, HttpStatus, Patch, Post, Query } from "@nestjs/common";
 import { UserService } from './user.service';
+import { UserInterfaces } from "./user.interfaces";
+import { loginInformationDTO } from "./dto/userAccount.dto";
+import { User } from "./entity/user.entity";
 
 @Controller('user')
 export class UserController {
@@ -12,8 +15,16 @@ export class UserController {
   }
 
   @Get() // Read
-  readUserData() {
-    return 'user';
+  async readUserData(@Query() loginInformation: loginInformationDTO): Promise<User> {
+
+    const userList = await this.userService.getUserData(loginInformation)
+    if(!userList) throw new HttpException('Forbidden',HttpStatus.FORBIDDEN)
+
+    return Object.assign({
+      data : userList,
+      statusCode : 200,
+      statusMsg : 'Success'
+    })
   }
 
   @Patch() // Update
